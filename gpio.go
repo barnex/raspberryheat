@@ -36,14 +36,20 @@ func (pin GPIO) Set(value bool) {
 
 func echo(dest string, msg interface{}) {
 	f, err := os.OpenFile(dest, os.O_WRONLY, 0666)
-	check(err)
+	log(err)
 	defer f.Close()
 	checkIO(fmt.Fprint(f, msg))
 }
 
 func check(err error) {
 	if err != nil {
-		panic(err)
+		log(err) // todo
+	}
+}
+
+func log(err error) {
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 
