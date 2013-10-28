@@ -17,6 +17,23 @@ func (pin GPIO) Export() {
 	echo(GpioPath+"export", int(pin))
 }
 
+func (pin GPIO) Unexport() {
+	echo(GpioPath+"unexport", int(pin))
+}
+
+func (pin GPIO) Direction(d string) {
+	echo(GpioPath+pin.String()+"/direction", d)
+}
+
+func (pin GPIO) Set(value bool) {
+	ctl := GpioPath + pin.String() + "/value"
+	if value {
+		echo(ctl, 1)
+	} else {
+		echo(ctl, 0)
+	}
+}
+
 func echo(dest string, msg interface{}) {
 	f, err := os.OpenFile(dest, os.O_WRONLY, 0666)
 	check(err)

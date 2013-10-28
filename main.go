@@ -2,9 +2,31 @@
 
 package main
 
-import . "."
+import (
+	. "."
+	"fmt"
+)
+
+const (
+	status = GPIO(24)
+)
 
 func main() {
 	Init()
-	GPIO(24).Export()
+	defer Cleanup()
+
+}
+
+func Init() {
+	status.Export()
+	status.Direction("out")
+	status.Set(true)
+
+	sensors := LsSensors()
+	fmt.Println(sensors)
+}
+
+func Cleanup() {
+	status.Set(false)
+	status.Unexport()
 }
