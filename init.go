@@ -1,0 +1,5 @@
+package raspberryheat
+
+func Init() {
+
+}
