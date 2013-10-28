@@ -12,18 +12,26 @@ const (
 )
 
 func main() {
-	Init()
 	defer Cleanup()
 
-}
-
-func Init() {
 	status.Export()
 	status.Direction("out")
 	status.Set(true)
 
+
 	sensors := LsSensors()
 	fmt.Println(sensors)
+
+	for{
+		status.Set(false)
+		for _,s := range sensors{
+			fmt.Println(s, s.Read())
+		}
+		status.Set(true)
+		fmt.Println()
+
+	}
+
 }
 
 func Cleanup() {

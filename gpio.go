@@ -43,7 +43,7 @@ func echo(dest string, msg interface{}) {
 
 func check(err error) {
 	if err != nil {
-		log(err) // todo
+		panic(err)
 	}
 }
 
@@ -54,5 +54,5 @@ func log(err error) {
 }
 
 func checkIO(n int, err error) {
-	check(err)
+	log(err)
 }
