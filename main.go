@@ -6,26 +6,17 @@ import (
 	. "."
 	"fmt"
 	"log"
+	"time"
 )
 
-var (
-	LED1 = GPIO(17)  // tick
-	LED2 = GPIO(27)  // measure
-	LED3 = GPIO(22)  // soft error
-	LED4 = GPIO(25)  // hard error
-	LED5 = GPIO(24)
-	RELAY1 = GPIO(23)
-	RELAY2 = GPIO(18)
+var(
 	status = LED1
 )
 
 func main() {
 	defer Cleanup()
 
-	status.Export()
-	status.Direction("out")
 	status.Set(true)
-
 
 	sensors := LsSensors()
 	log.Println(sensors)
@@ -42,6 +33,7 @@ func main() {
 			}
 		}
 		status.Set(true)
+		time.Sleep(10*time.Millisecond)
 	}
 
 }
