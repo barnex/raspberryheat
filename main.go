@@ -16,7 +16,7 @@ var (
 	LED5 = GPIO(24)
 	RELAY1 = GPIO(23)
 	RELAY2 = GPIO(18)
-	status = LED5
+	status = LED1
 )
 
 func main() {

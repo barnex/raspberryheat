@@ -17,9 +17,6 @@ func GPIO(pin int) *Gpio {
 
 const GpioPath = "/sys/class/gpio/"
 
-func (p *Gpio) String() string {
-	return fmt.Sprint("gpio", p.pin)
-}
 
 func (p *Gpio) Export() {
 	echo(GpioPath+"export", p.pin)
@@ -30,7 +27,7 @@ func (p *Gpio) Unexport() {
 }
 
 func (p *Gpio) Direction(d string) {
-	echo(fmt.Sprint(GpioPath, p.pin, "/direction"), d)
+	echo(fmt.Sprint(GpioPath, "gpio", p.pin, "/direction"), d)
 }
 
 var (
@@ -40,7 +37,7 @@ var (
 
 func (p *Gpio) Set(value bool) {
 	if p.file == nil {
-		fname := fmt.Sprint(GpioPath, p.pin, "/value")
+		fname := fmt.Sprint(GpioPath, "gpio", p.pin, "/value")
 		f, err := os.OpenFile(fname, os.O_WRONLY, 0666)
 		if err != nil {
 			Log(err)
