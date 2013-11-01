@@ -5,10 +5,18 @@ package main
 import (
 	. "."
 	"fmt"
+	"log"
 )
 
 const (
-	status = GPIO(24)
+	LED1 = GPIO(17)
+	LED2 = GPIO(27)
+	LED3 = GPIO(22)
+	LED4 = GPIO(25)
+	LED5 = GPIO(24)
+	RELAY1 = GPIO(23)
+	RELAY2 = GPIO(18)
+	status = RELAY2
 )
 
 func main() {
@@ -20,16 +28,20 @@ func main() {
 
 
 	sensors := LsSensors()
-	fmt.Println(sensors)
+	log.Println(sensors)
 
 	for{
 		status.Set(false)
 		for _,s := range sensors{
-			fmt.Println(s, s.Read())
+			t, err := s.Read()
+			if err != nil{
+				log.Println(err)
+				continue
+			}else{
+				fmt.Println(t)
+			}
 		}
 		status.Set(true)
-		fmt.Println()
-
 	}
 
 }

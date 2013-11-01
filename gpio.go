@@ -37,7 +37,7 @@ func (pin GPIO) Set(value bool) {
 
 func echo(dest string, msg interface{}) {
 	f, err := os.OpenFile(dest, os.O_WRONLY, 0666)
-	if err != nil{
+	if err != nil {
 		Log(err)
 		return
 	}
