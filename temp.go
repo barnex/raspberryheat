@@ -1,6 +1,7 @@
 package raspberryheat
 
 import (
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -28,18 +29,30 @@ func LsSensors() []Sensor {
 	return sensors
 }
 
-func (s Sensor) Read() float64 {
+func (s Sensor) Read() (float64, error) {
 	var Buf [100]byte
 	buf := Buf[:]
 	f, err := os.Open(string(s))
-	check(err)
+	if err != nil {
+		return 0, err
+	}
 	defer f.Close()
 
-	n, _ := f.Read(buf)
+	n, err2 := f.Read(buf)
+	if err2 != nil {
+		return 0, err2
+	}
 	out := string(buf)
+	crcfail := strings.Index(out, "NO")
+	if crcfail != -1 {
+		return 0, errors.New("CRC fail")
+	}
 	start := strings.Index(out, "t=") + 2
-	temp := out[start:n-1]
-	t, err := strconv.ParseFloat(temp, 64)
-	check(err)
-	return t/1000
+	temp := out[start : n-1]
+	t, err3 := strconv.ParseFloat(temp, 64)
+	if err3 != nil {
+		return 0, err3
+	}
+
+	return t / 1000, nil
 }

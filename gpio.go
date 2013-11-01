@@ -2,6 +2,7 @@ package raspberryheat
 
 import (
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -36,7 +37,10 @@ func (pin GPIO) Set(value bool) {
 
 func echo(dest string, msg interface{}) {
 	f, err := os.OpenFile(dest, os.O_WRONLY, 0666)
-	log(err)
+	if err != nil{
+		Log(err)
+		return
+	}
 	defer f.Close()
 	checkIO(fmt.Fprint(f, msg))
 }
@@ -47,12 +51,12 @@ func check(err error) {
 	}
 }
 
-func log(err error) {
+func Log(err error) {
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
 func checkIO(n int, err error) {
-	log(err)
+	Log(err)
 }
