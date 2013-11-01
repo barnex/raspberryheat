@@ -6,32 +6,53 @@ import (
 	"os"
 )
 
+type Gpio struct {
+	pin  int
+	file *os.File
+}
+
+func GPIO(pin int) *Gpio {
+	return &Gpio{pin: pin}
+}
+
 const GpioPath = "/sys/class/gpio/"
 
-type GPIO int
-
-func (pin GPIO) String() string {
-	return fmt.Sprint("gpio", int(pin))
+func (p *Gpio) String() string {
+	return fmt.Sprint("gpio", p.pin)
 }
 
-func (pin GPIO) Export() {
-	echo(GpioPath+"export", int(pin))
+func (p *Gpio) Export() {
+	echo(GpioPath+"export", p.pin)
 }
 
-func (pin GPIO) Unexport() {
-	echo(GpioPath+"unexport", int(pin))
+func (p *Gpio) Unexport() {
+	echo(GpioPath+"unexport", p.pin)
 }
 
-func (pin GPIO) Direction(d string) {
-	echo(GpioPath+pin.String()+"/direction", d)
+func (p *Gpio) Direction(d string) {
+	echo(fmt.Sprint(GpioPath, p.pin, "/direction"), d)
 }
 
-func (pin GPIO) Set(value bool) {
-	ctl := GpioPath + pin.String() + "/value"
+var (
+	ON  = []byte("1")
+	OFF = []byte("0")
+)
+
+func (p *Gpio) Set(value bool) {
+	if p.file == nil {
+		fname := fmt.Sprint(GpioPath, p.pin, "/value")
+		f, err := os.OpenFile(fname, os.O_WRONLY, 0666)
+		if err != nil {
+			Log(err)
+			return
+		} else {
+			p.file = f
+		}
+	}
 	if value {
-		echo(ctl, 1)
+		checkIO(p.file.Write(ON))
 	} else {
-		echo(ctl, 0)
+		checkIO(p.file.Write(OFF))
 	}
 }
 

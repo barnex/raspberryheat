@@ -8,15 +8,15 @@ import (
 	"log"
 )
 
-const (
-	LED1 = GPIO(17)
-	LED2 = GPIO(27)
-	LED3 = GPIO(22)
-	LED4 = GPIO(25)
+var (
+	LED1 = GPIO(17)  // tick
+	LED2 = GPIO(27)  // measure
+	LED3 = GPIO(22)  // soft error
+	LED4 = GPIO(25)  // hard error
 	LED5 = GPIO(24)
 	RELAY1 = GPIO(23)
 	RELAY2 = GPIO(18)
-	status = RELAY2
+	status = LED5
 )
 
 func main() {
