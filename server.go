@@ -1,16 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"text/template"
 )
 
 func StartHTTP() {
-	http.HandleFunc("/", rootHandler)
+	var data Dummy
+	templ := template.Must(template.New("root").Parse(templText))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		templ.Execute(w, data)
+		blink(httpLED)
+	})
 	check(http.ListenAndServe(":8080", nil))
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, getTemp())
-	blink(httpLED)
-}
+type Dummy int
+
+const templText = `
+	
+`
