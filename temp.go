@@ -1,4 +1,4 @@
-package raspberryheat
+package main
 
 import (
 	"errors"

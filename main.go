@@ -1,19 +1,17 @@
-//+build ignore
-
 package main
 
 import (
-	. "."
+	"fmt"
 	"log"
 	"sync"
-	"fmt"
 	"time"
 )
 
 var (
 	statusLED  = LED1
 	measureLED = LED2
-	errorLED   = LED3
+	httpLED    = LED3
+	errorLED   = LED4
 )
 
 var (
@@ -21,11 +19,19 @@ var (
 	measureLock sync.Mutex
 )
 
+func getTemp() []float64 {
+	measureLock.Lock()
+	defer measureLock.Unlock()
+	return temp
+}
+
 func main() {
 
 	sensors := LsSensors()
 	log.Println(sensors)
 	temp = make([]float64, len(sensors))
+
+	go StartHTTP()
 
 	for {
 		blink(statusLED)

@@ -1,3 +1,3 @@
 all:
-	go build main.go
+	go build
 	go fmt
