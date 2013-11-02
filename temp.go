@@ -11,7 +11,7 @@ const W1Path = "/sys/bus/w1/devices/"
 
 type Sensor string
 
-func LsSensors() []Sensor {
+func LsSensors() []*Sensor {
 	devices, err := os.Open(W1Path)
 	check(err)
 	defer devices.Close()
@@ -19,20 +19,21 @@ func LsSensors() []Sensor {
 	fi, err := devices.Readdir(-1)
 	check(err)
 
-	var sensors []Sensor
+	var sensors []*Sensor
 	for _, f := range fi {
 		if f.Name() == "w1_bus_master1" {
 			continue
 		}
-		sensors = append(sensors, Sensor(W1Path+f.Name())+"/w1_slave")
+		s := Sensor(W1Path + f.Name() + "/w1_slave")
+		sensors = append(sensors, &s)
 	}
 	return sensors
 }
 
-func (s Sensor) Read() (float64, error) {
+func (s *Sensor) Read() (float64, error) {
 	var Buf [100]byte
 	buf := Buf[:]
-	f, err := os.Open(string(s))
+	f, err := os.Open(string(*s))
 	if err != nil {
 		return 0, err
 	}

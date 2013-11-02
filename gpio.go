@@ -6,33 +6,33 @@ import (
 	"os"
 )
 
-type gpio struct {
+type GPIO struct {
 	pin  int
 	file *os.File
 }
 
 var (
-	LED1   = &gpio{pin: 17}
-	LED2   = &gpio{pin: 27}
-	LED3   = &gpio{pin: 22}
-	LED4   = &gpio{pin: 25}
-	LED5   = &gpio{pin: 24}
-	RELAY1 = &gpio{pin: 23}
-	RELAY2 = &gpio{pin: 18}
+	LED1   = &GPIO{pin: 17}
+	LED2   = &GPIO{pin: 27}
+	LED3   = &GPIO{pin: 22}
+	LED4   = &GPIO{pin: 25}
+	LED5   = &GPIO{pin: 24}
+	RELAY1 = &GPIO{pin: 23}
+	RELAY2 = &GPIO{pin: 18}
 )
 
-const GpioPath = "/sys/class/gpio/"
+const GPIOPath = "/sys/class/gpio/"
 
-func (p *gpio) Export() {
-	echo(GpioPath+"export", p.pin)
+func (p *GPIO) Export() {
+	echo(GPIOPath+"export", p.pin)
 }
 
-func (p *gpio) Unexport() {
-	echo(GpioPath+"unexport", p.pin)
+func (p *GPIO) Unexport() {
+	echo(GPIOPath+"unexport", p.pin)
 }
 
-func (p *gpio) Direction(d string) {
-	echo(fmt.Sprint(GpioPath, "gpio", p.pin, "/direction"), d)
+func (p *GPIO) Direction(d string) {
+	echo(fmt.Sprint(GPIOPath, "gpio", p.pin, "/direction"), d)
 }
 
 var (
@@ -40,11 +40,11 @@ var (
 	OFF = []byte("0")
 )
 
-func (p *gpio) Set(value bool) {
+func (p *GPIO) Set(value bool) {
 	if p.file == nil {
 		p.Export()
 		p.Direction("out")
-		fname := fmt.Sprint(GpioPath, "gpio", p.pin, "/value")
+		fname := fmt.Sprint(GPIOPath, "gpio", p.pin, "/value")
 		f, err := os.OpenFile(fname, os.O_WRONLY, 0666)
 		if err != nil {
 			Log(err)

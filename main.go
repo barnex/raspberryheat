@@ -4,41 +4,51 @@ package main
 
 import (
 	. "."
-	"fmt"
 	"log"
+	"sync"
+	"fmt"
 	"time"
 )
 
-var(
-	status = LED1
+var (
+	statusLED  = LED1
+	measureLED = LED2
+	errorLED   = LED3
+)
+
+var (
+	temp        []float64
+	measureLock sync.Mutex
 )
 
 func main() {
-	defer Cleanup()
-
-	status.Set(true)
 
 	sensors := LsSensors()
 	log.Println(sensors)
+	temp = make([]float64, len(sensors))
 
-	for{
-		status.Set(false)
-		for _,s := range sensors{
+	for {
+		blink(statusLED)
+
+		for i, s := range sensors {
 			t, err := s.Read()
-			if err != nil{
+			if err != nil {
+				blink(errorLED)
 				log.Println(err)
 				continue
-			}else{
-				fmt.Println(t)
 			}
+			measureLock.Lock()
+			temp[i] = t
+			measureLock.Unlock()
+			fmt.Print(t, " ")
+			blink(measureLED)
 		}
-		status.Set(true)
-		time.Sleep(10*time.Millisecond)
+		fmt.Println()
 	}
-
 }
 
-func Cleanup() {
-	status.Set(false)
-	status.Unexport()
+func blink(led *GPIO) {
+	led.Set(true)
+	time.Sleep(10 * time.Millisecond)
+	led.Set(false)
 }
