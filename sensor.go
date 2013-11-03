@@ -30,6 +30,11 @@ func LsSensors() []*Sensor {
 	return sensors
 }
 
+func NewSensor(name string) *Sensor {
+	s := Sensor(W1Path + name + "/w1_slave")
+	return &s
+}
+
 func (s *Sensor) Read() (float64, error) {
 	var Buf [100]byte
 	buf := Buf[:]
