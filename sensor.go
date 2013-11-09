@@ -16,6 +16,8 @@ type Sensor struct {
 	description string
 	temp        float64
 	led         *GPIO
+	sumTemp     float64
+	sumN        int
 	sync.Mutex
 	err error
 }
@@ -26,6 +28,15 @@ func NewSensor(file, name string, led *GPIO) *Sensor {
 
 func (s *Sensor) Label(prefix string) string {
 	return prefix + "_" + s.description
+}
+
+func (s *Sensor) AvgTemp() float64 {
+	s.Lock()
+	defer s.Unlock()
+	avg := s.sumTemp / float64(s.sumN)
+	s.sumTemp = 0
+	s.sumN = 0
+	return avg
 }
 
 func (s *Sensor) Error() string {
@@ -57,6 +68,9 @@ func (s *Sensor) Update() {
 	// store temp
 	s.temp = t
 	s.err = nil
+	// track average
+	s.sumN++
+	s.sumTemp += t
 	s.Unlock()
 
 	// report success

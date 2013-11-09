@@ -4,18 +4,23 @@ import (
 	"time"
 )
 
-var (
-	sensor = []*Sensor{
-		NewSensor("28-0000050ad012", "living", LED1),
-		NewSensor("28-0000050b07f7", "kindjes", LED2)}
-)
+var sensor = []*Sensor{
+	NewSensor("28-0000050ad012", "living", LED1),
+	NewSensor("28-0000050b07f7", "kindjes", LED2)}
+
+const logPeriod = 5 * time.Second
 
 func main() {
 	go StartHTTP()
 
+	lastLog := time.Now()
 	for {
 		for _, s := range sensor {
 			s.Update()
+		}
+		if time.Since(lastLog) > logPeriod {
+			doLog()
+			lastLog = time.Now()
 		}
 	}
 }
