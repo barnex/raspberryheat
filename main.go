@@ -8,7 +8,7 @@ var sensor = []*Sensor{
 	NewSensor("28-0000050ad012", "living", LED1),
 	NewSensor("28-0000050b07f7", "kindjes", LED2)}
 
-const logPeriod = 5 * time.Second
+const logPeriod = 60 * time.Second
 
 func main() {
 	go StartHTTP()

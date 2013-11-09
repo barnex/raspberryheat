@@ -19,6 +19,7 @@ func StartHTTP() {
 	})
 
 	http.Handle("/", doc)
+	http.HandleFunc("/plot/", servePlot)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
@@ -64,7 +65,11 @@ const templ = `
 		</span><br/>
 		<span style="font-weight:bold; color:red"> {{.Label "error" | $.Span}} </span> <br/>
 
+	<hr/>
+
 	{{ end }}
+
+	<img src="plot">
 
 	<hr/>
 
