@@ -1,19 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"github.com/barnex/gui"
 	"net/http"
 	"time"
 )
 
 func StartHTTP() {
-	data := []int{0, 1} // room numbers
-	doc := gui.NewDoc(templ, data)
+	doc := gui.NewDoc(templ, sensor)
 
 	doc.OnRefresh(func() {
 		doc.SetValue("time", time.Now().Format(time.ANSIC))
-		doc.SetValue("temp0", sensor[0].Temp())
-		doc.SetValue("temp1", sensor[1].Temp())
+		for _, s := range sensor {
+			doc.SetValue(s.Label("readout"), fmt.Sprintf("%.1f", s.Temp()))
+			doc.SetValue(s.Label("error"), s.Error())
+		}
 	})
 
 	http.Handle("/", doc)
@@ -25,6 +27,7 @@ func StartHTTP() {
 }
 
 const templ = `
+
 <html>
 
 <head>
@@ -39,15 +42,33 @@ const templ = `
 
 <body>
 
+	{{.Span "time"}}  <br/>
+
+	<hr/>
+		master:
+		{{$.Button "masterOn"   "<b>ON </b>"}} 
+		{{$.Button "masterOff"  "<b>OFF</b>"}} 
+		{{$.Button "masterAuto" "<b>Auto</b>"}} 
+
+	<hr/>
+	
+	{{ range $.Data }}
+
+		{{.Description}}
+		{{.Label "temp" | $.TextBox}} <sup>o</sup>C
+		van {{.Label "start" | $.TextBox}}
+		tot {{.Label "stop" | $.TextBox}} <br/>
+
+		<span style="font-size:2em; font-weight:bold">
+			{{.Label "readout" | $.Span }} <sup>o</sup>C 
+		</span><br/>
+		<span style="font-weight:bold; color:red"> {{.Label "error" | $.Span}} </span> <br/>
+
+	{{ end }}
+
+	<hr/>
+
 	<p> {{.ErrorBox}} </p>
-	{{.Span "time" "--"}}  <br/>
-
-	<hr/>
-
-	living <p style="font-size:2em; font-weight:bold">{{.Span "temp0" "--"}} <sup>o</sup>C <p> <br/>
-	kindjes <p style="font-size:2em; font-weight:bold">{{.Span "temp1" "--"}} <sup>o</sup>C <p> <br/>
-
-	<hr/>
 
 </body>
 </html>

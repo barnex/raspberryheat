@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -18,25 +17,46 @@ type Sensor struct {
 	temp        float64
 	led         *GPIO
 	sync.Mutex
+	err error
 }
 
 func NewSensor(file, name string, led *GPIO) *Sensor {
 	return &Sensor{file: W1Path + file + "/w1_slave", description: name, led: led}
 }
 
+func (s *Sensor) Label(prefix string) string {
+	return prefix + "_" + s.description
+}
+
+func (s *Sensor) Error() string {
+	s.Lock()
+	defer s.Unlock()
+	if s.err != nil {
+		return s.err.Error()
+	}
+	return ""
+}
+
+func (s *Sensor) Description() string {
+	return s.description
+}
+
 func (s *Sensor) Update() {
 	t, err := s.Read()
 
+	s.Lock()
+
 	// report temp read error
 	if err != nil {
+		s.err = err
+		s.Unlock()
 		blinkErr(s.led)
-		log.Println(err)
 		return
 	}
 
 	// store temp
-	s.Lock()
 	s.temp = t
+	s.err = nil
 	s.Unlock()
 
 	// report success

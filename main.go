@@ -7,11 +7,10 @@ import (
 var (
 	sensor = []*Sensor{
 		NewSensor("28-0000050ad012", "living", LED1),
-		NewSensor("28-0000050b07f7", "rugrats", LED2)}
+		NewSensor("28-0000050b07f7", "kindjes", LED2)}
 )
 
 func main() {
-
 	go StartHTTP()
 
 	for {
