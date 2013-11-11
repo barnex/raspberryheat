@@ -7,30 +7,44 @@ import (
 	"time"
 )
 
-var logfile *os.File
-
-const logfname = "temperature.log"
+var (
+	logFile    *os.File
+	logFileDay int
+)
 
 func doLog() {
 	// make sure log file is open
-	if logfile == nil {
+	if logFile == nil {
+		now := time.Now()
+		fname := logFileName(now)
+		logFileDay = now.Day()
+		_ = os.Mkdir(fmt.Sprint(now.Year()), 0777)
 		var err error
-		logfile, err = os.OpenFile(logfname, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+		logFile, err = os.OpenFile(fname, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		log.Println("logging to", logfname)
-		fmt.Fprintln(logfile)
+		log.Println("logging to", fname)
+		fmt.Fprintln(logFile)
+	}
+
+	now := time.Now()
+
+	if now.Day() != logFileDay {
+		logFile.Close()
+		logFile = nil
+		return
 	}
 
 	// log
-	fmt.Fprint(logfile, time.Now().Unix())
+	fmt.Fprint(logFile, now.Unix())
 	for _, s := range sensor {
-		fmt.Fprint(logfile, "\t", s.AvgTemp()) // also resets average temp
+		fmt.Fprintf(logFile, "\t%.3f", s.AvgTemp()) // also resets average temp
 	}
-	fmt.Fprintln(logfile)
+	fmt.Fprintln(logFile)
 }
 
-func assureLogFile() {
+func logFileName(now time.Time) string {
+	return fmt.Sprint(now.Year(), "/", now.Month(), "-", now.Day(), ".log")
 }
