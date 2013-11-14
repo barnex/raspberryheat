@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -9,21 +10,25 @@ import (
 	"time"
 )
 
-const W1Path = "/sys/bus/w1/devices/"
+const (
+	W1Path    = "/sys/bus/w1/devices/"
+	MaxErrors = 10 // maximum number of successive read errors before sensor is considered faulty
+)
 
 type Sensor struct {
-	file        string
-	description string
-	temp        float64
-	led         *GPIO
-	sumTemp     float64
-	sumN        int
+	file        string  // sensor device file
+	description string  // room description (living, ...)
+	temp        float64 // room temperature in °C
+	led         *GPIO   // room LED to blink
+	sumTemp     float64 // to track average temperature
+	sumN        int     // to track average temperature
+	errRun      int     // number of successive errors, too many -> temp=NaN
+	err         error   // last error, if any
 	sync.Mutex
-	err error
 }
 
 func NewSensor(file, name string, led *GPIO) *Sensor {
-	return &Sensor{file: W1Path + file + "/w1_slave", description: name, led: led}
+	return &Sensor{file: W1Path + file + "/w1_slave", description: name, led: led, temp: math.NaN()}
 }
 
 func (s *Sensor) Label(prefix string) string {
@@ -60,6 +65,10 @@ func (s *Sensor) Update() {
 	// report temp read error
 	if err != nil {
 		s.err = err
+		s.errRun++
+		if s.errRun > MaxErrors {
+			s.temp = math.NaN()
+		}
 		s.Unlock()
 		blinkErr(s.led)
 		return
@@ -67,6 +76,7 @@ func (s *Sensor) Update() {
 
 	// store temp
 	s.temp = t
+	s.errRun = 0
 	s.err = nil
 	// track average
 	s.sumN++
