@@ -59,7 +59,6 @@ func (s *Sensor) Description() string {
 
 func (s *Sensor) Update() {
 	t, err := s.Read()
-
 	s.Lock()
 
 	// report temp read error
@@ -76,15 +75,13 @@ func (s *Sensor) Update() {
 
 	// store temp
 	s.temp = t
-	s.errRun = 0
-	s.err = nil
+	s.errRun, s.err = 0, nil
 	// track average
 	s.sumN++
 	s.sumTemp += t
-	s.Unlock()
 
-	// report success
-	blinkOK(s.led)
+	s.Unlock()
+	blinkOK(s.led) // report success
 }
 
 func (s *Sensor) Temp() float64 {
