@@ -32,6 +32,7 @@ const templ = `
 <html>
 
 <head>
+	<meta http-equiv="refresh" content="300">
 	<style type="text/css">
 		body      { margin: 20px; font-family: Ubuntu, Arial, sans-serif; }
 		hr        { border-style: none; border-top: 1px solid #CCCCCC; }
