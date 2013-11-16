@@ -20,15 +20,34 @@ func main() {
 	lastLog := time.Now()
 	for {
 
+		// Update all sensors
 		for _, r := range rooms {
-			r.Update()
+			r.sensor.Update()
+		}
+
+		// If at least one room is overheated, then we reset the other's
+		// Schmidt triggers so they may stop heating uless absolutely required.
+		var overheated bool
+		for _, r := range rooms {
+			if r.Overheat() {
+				overheated = true
+				break
+			}
+		}
+		if overheated {
+			for _, r := range rooms {
+				// Reset Schmidt trigger unless right at the edge.
+				if r.sensor.Temp() > r.SetTemp -r.Schmidt + 0.1 {
+					r.Burn = false
+				}
+			}
 		}
 
 		Burn = false
 		for _, r := range rooms {
-			if r.Burn{
+			r.UpdateBurn()
+			if r.Burn {
 				Burn = true
-				break
 			}
 		}
 		HEATER.Set(Burn)

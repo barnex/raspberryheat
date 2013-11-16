@@ -12,20 +12,28 @@ func StartHTTP() {
 
 	doc.OnRefresh(func() {
 		doc.SetValue("time", time.Now().Format(time.ANSIC))
-		doc.SetValue("burn", Burn)
+		doc.SetValue("burn", boolf(Burn))
 		for _, r := range rooms {
 			doc.SetValue(r.GUILabel("readout"), fmt.Sprintf("%.1f", r.sensor.Temp()))
 			doc.SetValue(r.GUILabel("error"), r.sensor.Error())
 			doc.SetValue(r.GUILabel("settemp"), r.SetTemp)
-			doc.SetValue(r.GUILabel("burn"), r.Burn)
+			doc.SetValue(r.GUILabel("schmidt"), r.Schmidt)
+			doc.SetValue(r.GUILabel("burn"), boolf(r.Burn))
+			if r.Overheat(){
+				doc.SetValue(r.GUILabel("overheat"), "(te warm)")
+			}else{
+				doc.SetValue(r.GUILabel("overheat"), "")
+			}
 		}
 	})
 
-for _, r := range rooms {
-	r := r
-	label := r.GUILabel("settemp")
-	doc.OnEvent(label,func(){ r.SetTemp = doc.Value(label).(float64)})
-}
+	for _, r := range rooms {
+		r := r
+		label := r.GUILabel("settemp")
+		doc.OnEvent(label, func() { r.SetSetTemp(doc.Value(label).(float64)) })
+		schmidt := r.GUILabel("schmidt")
+		doc.OnEvent(schmidt, func() { r.SetSchmidt(doc.Value(schmidt).(float64)) })
+	}
 
 	http.Handle("/", doc)
 	http.HandleFunc("/plot/", servePlot)
@@ -66,8 +74,8 @@ const templ = `
 		</span><br/>
 		<span style="font-weight:bold; color:red"> {{.GUILabel "error" | $.Span}} </span> <br/>
 
-		set: {{.GUILabel "settemp" | $.NumBox}} <sup>o</sup>C <br/>
-		brander: {{.GUILabel "burn" | $.Span}} <br/>
+		set: {{.GUILabel "settemp" | $.NumBox}} &plusmn; {{.GUILabel "schmidt" | $.NumBox}} <sup>o</sup>C <br/>
+		vraagt warmte: {{.GUILabel "burn" | $.Span}} {{.GUILabel "overheat" | $.Span}} <br/>
 
 	<hr/>
 
@@ -82,3 +90,10 @@ const templ = `
 </body>
 </html>
 `
+
+func boolf(a bool) string {
+	if a {
+		return "AAN"
+	}
+	return "UIT"
+}
