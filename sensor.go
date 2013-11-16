@@ -16,13 +16,13 @@ const (
 )
 
 type Sensor struct {
-	file        string  // sensor device file
-	temp        float64 // room temperature in °C
-	led         *GPIO   // room LED to blink
-	sumTemp     float64 // to track average temperature
-	sumN        int     // to track average temperature
-	errRun      int     // number of successive errors, too many -> temp=NaN
-	err         error   // last error, if any
+	file    string  // sensor device file
+	temp    float64 // room temperature in °C
+	led     *GPIO   // room LED to blink
+	sumTemp float64 // to track average temperature
+	sumN    int     // to track average temperature
+	errRun  int     // number of successive errors, too many -> temp=NaN
+	err     error   // last error, if any
 	sync.Mutex
 }
 
@@ -47,7 +47,6 @@ func (s *Sensor) Error() string {
 	}
 	return ""
 }
-
 
 func (s *Sensor) Update() {
 	t, err := s.Read()

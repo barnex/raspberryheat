@@ -5,32 +5,39 @@ import (
 )
 
 const logPeriod = 2 * time.Minute
+
 var HEATER = RELAY2
 
 var rooms = []*Room{
 	NewRoom("living", "28-0000050ad012", LED1),
 	NewRoom("kindjes", "28-0000050b07f7", LED2)}
 
+var Burn bool
 
 func main() {
 	go StartHTTP()
 
 	lastLog := time.Now()
 	for {
+
 		for _, r := range rooms {
-			r.sensor.Update()
+			r.Update()
 		}
+
+		Burn = false
+		for _, r := range rooms {
+			if r.Burn{
+				Burn = true
+				break
+			}
+		}
+		HEATER.Set(Burn)
+
 		if time.Since(lastLog) > logPeriod {
 			doLog()
 			lastLog = time.Now()
 		}
 
-		if rooms[0].sensor.Temp() > 18.2{
-			HEATER.Set(false)
-		}
-		if rooms[0].sensor.Temp() < 17.8{
-			HEATER.Set(true)
-		}
 	}
 }
 

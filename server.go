@@ -12,11 +12,20 @@ func StartHTTP() {
 
 	doc.OnRefresh(func() {
 		doc.SetValue("time", time.Now().Format(time.ANSIC))
+		doc.SetValue("burn", Burn)
 		for _, r := range rooms {
 			doc.SetValue(r.GUILabel("readout"), fmt.Sprintf("%.1f", r.sensor.Temp()))
 			doc.SetValue(r.GUILabel("error"), r.sensor.Error())
+			doc.SetValue(r.GUILabel("settemp"), r.SetTemp)
+			doc.SetValue(r.GUILabel("burn"), r.Burn)
 		}
 	})
+
+for _, r := range rooms {
+	r := r
+	label := r.GUILabel("settemp")
+	doc.OnEvent(label,func(){ r.SetTemp = doc.Value(label).(float64)})
+}
 
 	http.Handle("/", doc)
 	http.HandleFunc("/plot/", servePlot)
@@ -45,26 +54,20 @@ const templ = `
 <body>
 
 	{{.Span "time"}}  <br/>
-
-	<hr/>
-		master:
-		{{$.Button "masterOn"   "<b>ON </b>"}} 
-		{{$.Button "masterOff"  "<b>OFF</b>"}} 
-		{{$.Button "masterAuto" "<b>Auto</b>"}} 
+	brander: {{$.Span "burn"}} 
 
 	<hr/>
 	
 	{{ range $.Data }}
 
-		{{.Name}}
-		{{.GUILabel "temp" | $.TextBox}} <sup>o</sup>C
-		van {{.GUILabel "start" | $.TextBox}}
-		tot {{.GUILabel "stop" | $.TextBox}} <br/>
-
+		<h2>{{.Name}}</h2>
 		<span style="font-size:2em; font-weight:bold">
 			{{.GUILabel "readout" | $.Span }} <sup>o</sup>C 
 		</span><br/>
 		<span style="font-weight:bold; color:red"> {{.GUILabel "error" | $.Span}} </span> <br/>
+
+		set: {{.GUILabel "settemp" | $.NumBox}} <sup>o</sup>C <br/>
+		brander: {{.GUILabel "burn" | $.Span}} <br/>
 
 	<hr/>
 

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var dst = 1*time.Hour
+var dst = 1 * time.Hour
 
 func servePlot(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
@@ -20,7 +20,7 @@ func servePlot(w http.ResponseWriter, r *http.Request) {
 		if i != 0 {
 			cmd += ","
 		}
-		usingX :=  fmt.Sprint("($1+", dst.Seconds(), ")")
+		usingX := fmt.Sprint("($1+", dst.Seconds(), ")")
 		usingY := i + 2
 		cmd += fmt.Sprintf(`"<cat %v %v" u %v:%v w li title "%v"`, yesterLog, todayLog, usingX, usingY, r.Name)
 	}
