@@ -8,13 +8,13 @@ import (
 )
 
 func StartHTTP() {
-	doc := gui.NewDoc(templ, sensor)
+	doc := gui.NewDoc(templ, rooms)
 
 	doc.OnRefresh(func() {
 		doc.SetValue("time", time.Now().Format(time.ANSIC))
-		for _, s := range sensor {
-			doc.SetValue(s.Label("readout"), fmt.Sprintf("%.1f", s.Temp()))
-			doc.SetValue(s.Label("error"), s.Error())
+		for _, r := range rooms {
+			doc.SetValue(r.GUILabel("readout"), fmt.Sprintf("%.1f", r.sensor.Temp()))
+			doc.SetValue(r.GUILabel("error"), r.sensor.Error())
 		}
 	})
 
@@ -32,7 +32,7 @@ const templ = `
 <html>
 
 <head>
-	<meta http-equiv="refresh" content="300">
+	<meta http-equiv="refresh" content="120">
 	<style type="text/css">
 		body      { margin: 20px; font-family: Ubuntu, Arial, sans-serif; }
 		hr        { border-style: none; border-top: 1px solid #CCCCCC; }
@@ -56,15 +56,15 @@ const templ = `
 	
 	{{ range $.Data }}
 
-		{{.Description}}
-		{{.Label "temp" | $.TextBox}} <sup>o</sup>C
-		van {{.Label "start" | $.TextBox}}
-		tot {{.Label "stop" | $.TextBox}} <br/>
+		{{.Name}}
+		{{.GUILabel "temp" | $.TextBox}} <sup>o</sup>C
+		van {{.GUILabel "start" | $.TextBox}}
+		tot {{.GUILabel "stop" | $.TextBox}} <br/>
 
 		<span style="font-size:2em; font-weight:bold">
-			{{.Label "readout" | $.Span }} <sup>o</sup>C 
+			{{.GUILabel "readout" | $.Span }} <sup>o</sup>C 
 		</span><br/>
-		<span style="font-weight:bold; color:red"> {{.Label "error" | $.Span}} </span> <br/>
+		<span style="font-weight:bold; color:red"> {{.GUILabel "error" | $.Span}} </span> <br/>
 
 	<hr/>
 

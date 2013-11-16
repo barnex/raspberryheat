@@ -39,8 +39,8 @@ func doLog() {
 
 	// log
 	fmt.Fprint(logFile, now.Unix())
-	for _, s := range sensor {
-		fmt.Fprintf(logFile, "\t%.3f", s.AvgTemp()) // also resets average temp
+	for _, r := range rooms {
+		fmt.Fprintf(logFile, "\t%.3f", r.sensor.AvgTemp()) // also resets average temp
 	}
 	fmt.Fprintln(logFile)
 }

@@ -4,23 +4,32 @@ import (
 	"time"
 )
 
-var sensor = []*Sensor{
-	NewSensor("28-0000050ad012", "living", LED1),
-	NewSensor("28-0000050b07f7", "kindjes", LED2)}
+const logPeriod = 2 * time.Minute
+var HEATER = RELAY2
 
-const logPeriod = 3 * time.Minute
+var rooms = []*Room{
+	NewRoom("living", "28-0000050ad012", LED1),
+	NewRoom("kindjes", "28-0000050b07f7", LED2)}
+
 
 func main() {
 	go StartHTTP()
 
 	lastLog := time.Now()
 	for {
-		for _, s := range sensor {
-			s.Update()
+		for _, r := range rooms {
+			r.sensor.Update()
 		}
 		if time.Since(lastLog) > logPeriod {
 			doLog()
 			lastLog = time.Now()
+		}
+
+		if rooms[0].sensor.Temp() > 18.2{
+			HEATER.Set(false)
+		}
+		if rooms[0].sensor.Temp() < 17.8{
+			HEATER.Set(true)
 		}
 	}
 }

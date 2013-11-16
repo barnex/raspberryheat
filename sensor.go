@@ -17,7 +17,6 @@ const (
 
 type Sensor struct {
 	file        string  // sensor device file
-	description string  // room description (living, ...)
 	temp        float64 // room temperature in °C
 	led         *GPIO   // room LED to blink
 	sumTemp     float64 // to track average temperature
@@ -27,12 +26,8 @@ type Sensor struct {
 	sync.Mutex
 }
 
-func NewSensor(file, name string, led *GPIO) *Sensor {
-	return &Sensor{file: W1Path + file + "/w1_slave", description: name, led: led, temp: math.NaN()}
-}
-
-func (s *Sensor) Label(prefix string) string {
-	return prefix + "_" + s.description
+func NewSensor(file string, led *GPIO) *Sensor {
+	return &Sensor{file: W1Path + file + "/w1_slave", led: led, temp: math.NaN()}
 }
 
 func (s *Sensor) AvgTemp() float64 {
@@ -53,9 +48,6 @@ func (s *Sensor) Error() string {
 	return ""
 }
 
-func (s *Sensor) Description() string {
-	return s.description
-}
 
 func (s *Sensor) Update() {
 	t, err := s.Read()
@@ -113,7 +105,7 @@ func (s *Sensor) Read() (float64, error) {
 	out := string(buf)
 	crcfail := strings.Index(out, "NO")
 	if crcfail != -1 {
-		return 0, fmt.Errorf("%v CRC fail", s.description)
+		return 0, fmt.Errorf("CRC fail")
 	}
 
 	// parse temperature (milligrades)
@@ -126,13 +118,13 @@ func (s *Sensor) Read() (float64, error) {
 
 	// disconnected 3V3 can give wrong temp, correct CRC but returns quickly
 	if time.Since(startt) < 500*time.Millisecond {
-		return 0, fmt.Errorf("%v returned too fast", s.description)
+		return 0, fmt.Errorf("measurment returned too fast")
 	}
 
 	// disconnected 3V3 can just give wrong temp
 	// so do sanity check
 	if t > 40*1000 || t < -10*1000 {
-		return 0, fmt.Errorf("%v temperature too extreme: %v", s.description, t)
+		return 0, fmt.Errorf("measurment too extreme: %v", t)
 	}
 
 	return t / 1000, nil
